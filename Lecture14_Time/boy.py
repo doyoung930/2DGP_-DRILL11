@@ -49,7 +49,7 @@ ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
 # fill here
 
-
+# Bird Speed
 
 
 
@@ -80,6 +80,8 @@ class Idle:
     @staticmethod
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)%8
+
+        boy.bird_frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
         #boy.frame = (boy.frame + 1) % 8
         if get_time() - boy.wait_time > 2:
             boy.state_machine.handle_event(('TIME_OUT', 0))
@@ -87,9 +89,17 @@ class Idle:
     @staticmethod
     def draw(boy):
         boy.image.clip_draw(int(boy.frame) * 100, boy.action * 100, 100, 100, boy.x, boy.y)
-
-
-
+        if boy.dir == 1:
+            boy.image_bird.clip_composite_draw(int(boy.bird_frame) * 100, 200, 100, 100,
+                                           0, ' ', boy.x + 25, boy.y + 300, 100, 100)
+        elif boy.dir == -1:
+            boy.image_bird.clip_composite_draw(int(boy.bird_frame) * 100, 200, 100, 100,
+                                               0, 'v', boy.x + 25, boy.y + 300, 100, 100)
+        elif boy.dir == 0:
+            for row in range(3):
+                for col in range(5):
+                    boy.image_bird.clip_composite_draw(int(boy.bird_frame) * 182, 160, 180, 180,
+                                               0, ' ', boy.x + 25, boy.y + 300, 180, 180)
 class Run:
 
     @staticmethod
@@ -109,6 +119,7 @@ class Run:
     @staticmethod
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
+        boy.bird_frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
         if get_time() - boy.wait_time > 2:
             boy.state_machine.handle_event(('TIME_OUT', 0))
         boy.x += boy.dir * 5
@@ -118,7 +129,12 @@ class Run:
     @staticmethod
     def draw(boy):
         boy.image.clip_draw(int(boy.frame) * 100, boy.action * 100, 100, 100, boy.x, boy.y)
-
+        if boy.dir == 1:
+            boy.image_bird.clip_composite_draw(int(boy.bird_frame) * 182, 160, 180, 180,
+                                               0, ' ', boy.x + 25, boy.y + 300, 180, 180)
+        if boy.dir == -1:
+            boy.image_bird.clip_composite_draw(int(boy.bird_frame) * 182, 160, 180, 180,
+                                               0, 'h', boy.x + 25, boy.y + 300, 180, 180)
 
 
 class Sleep:
@@ -135,6 +151,7 @@ class Sleep:
     @staticmethod
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
+        boy.bird_frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
 
 
 
@@ -143,10 +160,13 @@ class Sleep:
         if boy.face_dir == -1:
             boy.image.clip_composite_draw(int(boy.frame) * 100, 200, 100, 100,
                                           -3.141592 / 2, '', boy.x + 25, boy.y - 25, 100, 100)
+            boy.image_bird.clip_composite_draw(int(boy.bird_frame) * 182, 160, 180, 180,
+                                               0, ' ', boy.x + 25, boy.y + 300, 180, 180)
         else:
             boy.image.clip_composite_draw(int(boy.frame) * 100, 300, 100, 100,
                                           3.141592 / 2, '', boy.x - 25, boy.y - 25, 100, 100)
-
+            boy.image_bird.clip_composite_draw(int(boy.bird_frame) * 182, 160, 180, 180,
+                                               0, ' ', boy.x + 25, boy.y + 300, 180, 180)
 
 class StateMachine:
     def __init__(self, boy):
@@ -179,16 +199,16 @@ class StateMachine:
 
 
 
-
-
 class Boy:
     def __init__(self):
         self.x, self.y = 400, 90
         self.frame = 0
+        self.bird_frame = 0
         self.action = 3
         self.face_dir = 1
         self.dir = 0
         self.image = load_image('animation_sheet.png')
+        self.image_bird = load_image('bird_animation.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         self.item = 'Ball'
@@ -219,3 +239,4 @@ class Boy:
     def draw(self):
         self.state_machine.draw()
         self.font.draw(self.x - 60, self.y + 50, f'(Time: {get_time():.2f})', (255, 255, 0))
+

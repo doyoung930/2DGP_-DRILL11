@@ -4,7 +4,7 @@ import game_framework
 import game_world
 from grass import Grass
 from boy import Boy
-
+from bird import Bird
 # boy = None
 
 def handle_events():
